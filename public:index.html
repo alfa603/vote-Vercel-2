@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votazione</title>
+</head>
+<body>
+  <h1>Vota il tuo preferito</h1>
+  <form id="vote-form">
+    <label for="user-id">Inserisci il tuo codice identificativo:</label><br>
+    <input type="text" id="user-id" name="userId" required><br><br>
+
+    <label for="vote">Scegli un nome:</label><br>
+    <select id="vote" name="vote" required>
+      <option value="nome1">Nome 1</option>
+      <option value="nome2">Nome 2</option>
+      <option value="nome3">Nome 3</option>
+    </select><br><br>
+
+    <button type="submit">Invia Voto</button>
+  </form>
+
+  <h2>Risultati:</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Codice Utente</th>
+        <th>Voto</th>
+      </tr>
+    </thead>
+    <tbody id="results-table"></tbody>
+  </table>
+
+  <script>
+    // Invio del voto
+    document.getElementById('vote-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById('user-id').value;
+      const vote = document.getElementById('vote').value;
+
+      const response = await fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, vote })
+      });
+
+      if (response.ok) {
+        alert('Voto inviato con successo!');
+        loadResults();
+      } else {
+        const error = await response.json();
+        alert(`Errore: ${error.error}`);
+      }
+    });
+
+    // Caricamento dei risultati
+    async function loadResults() {
+      const response = await fetch('/api/results');
+      const results = await response.json();
+
+      const table = document.getElementById('results-table');
+      table.innerHTML = '';
+      results.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.userId}</td><td>${row.vote}</td>`;
+        table.appendChild(tr);
+      });
+    }
+
+    // Carica i risultati al caricamento della pagina
+    loadResults();
+  </script>
+</body>
+</html>
